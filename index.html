@@ -1,0 +1,601 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Aplikasi Kas - In/Out (Offline, Responsive, Full CRUD)</title>
+
+<style>
+  :root{
+    --primary:#007bff;
+    --bg:#f5f7fb;
+    --card:#fff;
+    --muted:#666;
+    --danger:#d9534f;
+  }
+  *{box-sizing:border-box}
+  body{
+    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
+    background:var(--bg);
+    margin:0;
+    padding:18px;
+    display:flex;
+    justify-content:center;
+  }
+  .wrap{
+    width:100%;
+    max-width:980px;
+  }
+  header{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    gap:12px;
+    margin-bottom:12px;
+  }
+  header h1{font-size:1.15rem;margin:0}
+  .card{
+    background:var(--card);
+    border-radius:10px;
+    padding:14px;
+    box-shadow:0 6px 18px rgba(13,38,76,0.06);
+    margin-bottom:14px;
+  }
+
+  /* form grid */
+  .form-grid{
+    display:grid;
+    grid-template-columns: 140px 1fr 140px;
+    gap:10px;
+    align-items:end;
+  }
+  .form-grid label{font-size:13px;color:var(--muted)}
+  .form-grid input[type="text"],
+  .form-grid input[type="number"],
+  .form-grid input[type="date"],
+  .form-grid select{
+    width:100%;
+    padding:10px;
+    border-radius:8px;
+    border:1px solid #e0e6ef;
+    font-size:14px;
+  }
+  .btn{
+    background:var(--primary);
+    color:white;
+    border:none;
+    padding:10px 12px;
+    border-radius:8px;
+    cursor:pointer;
+    font-size:14px;
+  }
+  .btn.ghost{
+    background:transparent;color:var(--primary);border:1px solid #d7e6ff;
+  }
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
+
+  /* controls */
+  .controls{
+    display:flex;
+    gap:8px;
+    flex-wrap:wrap;
+    align-items:center;
+  }
+  .controls input[type="text"]{
+    padding:8px;border-radius:8px;border:1px solid #e1e6ef;
+  }
+
+  /* table */
+  .table-wrap{
+    overflow-x:auto;
+    -webkit-overflow-scrolling:touch;
+  }
+  table{
+    width:100%;
+    border-collapse:collapse;
+    min-width:700px;
+  }
+  th,td{
+    padding:10px 12px;
+    border-bottom:1px solid #f0f3f8;
+    text-align:left;
+    font-size:14px;
+  }
+  th{
+    background:#fbfdff;
+    position:relative;
+    user-select:none;
+    cursor:pointer;
+  }
+  th .sort-ind{
+    margin-left:8px;font-size:12px;color:#888;
+  }
+
+  .type-in{ color:green; font-weight:600; }
+  .type-out{ color:var(--danger); font-weight:600; }
+
+  .link-btn{
+    background:transparent;border:none;color:var(--primary);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:13px;
+  }
+  .link-btn.del{ color:var(--danger); }
+
+  /* modal */
+  .modal-back{
+    position:fixed;inset:0;background:rgba(11,20,40,0.45);display:flex;align-items:center;justify-content:center;z-index:60;
+  }
+  .modal{
+    width:100%;
+    max-width:520px;
+    background:var(--card);
+    padding:16px;border-radius:12px;box-shadow:0 12px 30px rgba(11,20,40,0.25);
+  }
+  .modal h3{margin:0 0 8px 0}
+  .modal .row{margin-top:8px}
+  .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
+
+  /* responsive adjustments */
+  @media (max-width:880px){
+    .form-grid{grid-template-columns:1fr; }
+    header{flex-direction:column;align-items:flex-start;gap:6px}
+  }
+  @media (max-width:520px){
+    th,td{padding:8px;font-size:13px}
+    .modal{margin:12px}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header>
+    <h1>Aplikasi Kas — In / Out</h1>
+    <div style="color:#556;text-align:right;font-size:13px">
+      Offline • Data autosave (LocalStorage) • Backup: JSON / CSV
+    </div>
+  </header>
+
+  <!-- INPUT -->
+  <div class="card">
+    <div class="form-grid">
+      <div>
+        <label>Jenis</label>
+        <select id="inputType">
+          <option value="IN">IN (Masuk)</option>
+          <option value="OUT">OUT (Keluar)</option>
+        </select>
+      </div>
+
+      <div>
+        <label>Jumlah</label>
+        <input id="inputAmount" type="number" placeholder="100000" min="0" />
+      </div>
+
+      <div>
+        <label>Catatan</label>
+        <input id="inputNote" type="text" placeholder="Contoh: Penjualan, Belanja..." />
+      </div>
+    </div>
+
+    <div class="row" style="margin-top:12px">
+      <button class="btn" onclick="addTransaction()">Tambah Transaksi</button>
+      <button class="btn ghost" onclick="clearAll()">Bersihkan Semua</button>
+    </div>
+  </div>
+
+  <!-- FILTER / SEARCH / EXPORT -->
+  <div class="card">
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:13px;color:var(--muted)">Filter Tgl</label>
+        <input id="filterFrom" type="date" />
+        <input id="filterTo" type="date" />
+      </div>
+
+      <div style="display:flex;gap:8px;align-items:center;">
+        <label style="font-size:13px;color:var(--muted)">Jenis</label>
+        <select id="filterType" onchange="applyFilterSortRender()">
+          <option value="ALL">ALL</option>
+          <option value="IN">IN</option>
+          <option value="OUT">OUT</option>
+        </select>
+      </div>
+
+      <div style="flex:1;min-width:180px">
+        <input id="searchInput" type="text" placeholder="Cari keterangan..." oninput="applyFilterSortRender()" style="width:100%;" />
+      </div>
+
+      <div class="controls" style="margin-left:auto">
+        <button class="btn ghost" onclick="resetFilters()">Reset Filter</button>
+
+        <button class="btn" onclick="exportJSON()">Export JSON</button>
+        <button class="btn" onclick="exportCSV()">Export CSV</button>
+
+        <input id="fileImport" type="file" accept="application/json" style="display:none" onchange="importJSON(event)" />
+        <button class="btn ghost" onclick="document.getElementById('fileImport').click()">Import JSON</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- BALANCE CARD -->
+  <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
+    <div>
+      <div style="font-size:13px;color:var(--muted)">Saldo Saat Ini</div>
+      <div id="balance" style="font-size:20px;font-weight:700">0</div>
+    </div>
+
+    <div style="text-align:right;font-size:13px;color:#777">
+      <div id="countInfo">0 transaksi</div>
+      <div id="lastSaved">Belum menyimpan</div>
+    </div>
+  </div>
+
+  <!-- TABLE -->
+  <div class="card table-wrap">
+    <table>
+      <thead>
+        <tr>
+          <th data-sort="timestamp" onclick="toggleSort('timestamp')">Tanggal <span class="sort-ind" id="sortTimestamp"></span></th>
+          <th>Jenis</th>
+          <th data-sort="amount" onclick="toggleSort('amount')">Jumlah <span class="sort-ind" id="sortAmount"></span></th>
+          <th>Catatan</th>
+          <th>Aksi</th>
+        </tr>
+      </thead>
+      <tbody id="tableBody">
+        <!-- rows injected -->
+      </tbody>
+    </table>
+  </div>
+
+</div>
+
+<!-- Modal (hidden) -->
+<div id="modalRoot" style="display:none"></div>
+
+<script>
+/* ===== Data model & persistence =====
+   - transactions: array of { id, type, amount, note, timestampISO }
+   - save to localStorage key: 'kas_transactions_v1'
+*/
+const LS_KEY = 'kas_transactions_v1';
+let transactions = [];
+let uiState = {
+  sortField: 'timestamp', // 'timestamp' or 'amount'
+  sortDir: 'desc' // 'asc' or 'desc'
+};
+let currentFilter = {
+  from: null,
+  to: null,
+  type: 'ALL',
+  q: ''
+};
+
+// --- Utilities ---
+const $ = (id)=>document.getElementById(id);
+function nowISO(){ return new Date().toISOString(); }
+function fmtLocal(tsISO){
+  try { return new Date(tsISO).toLocaleString(); } catch { return tsISO; }
+}
+function fmtMoney(n){
+  return Number(n).toLocaleString('id-ID', {maximumFractionDigits:2});
+}
+function save(){
+  localStorage.setItem(LS_KEY, JSON.stringify(transactions));
+  $('lastSaved').textContent = 'Tersimpan: ' + new Date().toLocaleTimeString();
+}
+function load(){
+  const s = localStorage.getItem(LS_KEY);
+  if(s){
+    try {
+      const arr = JSON.parse(s);
+      if(Array.isArray(arr)) transactions = arr;
+    } catch(e){ transactions = []; }
+  } else transactions = [];
+}
+
+/* --- Init load --- */
+load();
+
+/* ===== CRUD ===== */
+function addTransaction(){
+  const type = $('inputType').value;
+  const amount = parseFloat($('inputAmount').value);
+  const note = $('inputNote').value.trim();
+
+  if(!isFinite(amount) || amount <= 0){
+    alert('Masukkan jumlah valid (> 0).');
+    return;
+  }
+
+  const tx = {
+    id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    type, amount: Number(amount), note, timestamp: nowISO()
+  };
+  transactions.push(tx);
+  save();
+  applyFilterSortRender();
+  $('inputAmount').value = '';
+  $('inputNote').value = '';
+}
+
+/* Edit: open modal, modify tx by id */
+function openEditModal(txId){
+  const tx = transactions.find(t=>t.id===txId);
+  if(!tx) return alert('Transaksi tidak ditemukan');
+
+  const modalRoot = $('modalRoot');
+  modalRoot.innerHTML = `
+    <div class="modal-back" id="modalOverlay">
+      <div class="modal" role="dialog" aria-modal="true">
+        <h3>Edit Transaksi</h3>
+
+        <div style="margin-top:8px">
+          <label style="font-size:13px;color:var(--muted)">Jenis</label>
+          <select id="editType" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;">
+            <option value="IN">IN</option>
+            <option value="OUT">OUT</option>
+          </select>
+        </div>
+
+        <div style="margin-top:8px">
+          <label style="font-size:13px;color:var(--muted)">Jumlah</label>
+          <input id="editAmount" type="number" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;" />
+        </div>
+
+        <div style="margin-top:8px">
+          <label style="font-size:13px;color:var(--muted)">Catatan</label>
+          <input id="editNote" type="text" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;" />
+        </div>
+
+        <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
+          <button class="btn ghost" onclick="closeModal()">Batal</button>
+          <button class="btn" id="saveEditBtn">Simpan</button>
+        </div>
+      </div>
+    </div>
+  `;
+  modalRoot.style.display = 'block';
+
+  // populate
+  $('editType').value = tx.type;
+  $('editAmount').value = tx.amount;
+  $('editNote').value = tx.note || '';
+
+  // handers
+  $('saveEditBtn').onclick = function(){
+    const newType = $('editType').value;
+    const newAmount = parseFloat($('editAmount').value);
+    const newNote = $('editNote').value;
+
+    if(!isFinite(newAmount) || newAmount <= 0){
+      alert('Jumlah harus angka > 0');
+      return;
+    }
+
+    tx.type = newType;
+    tx.amount = Number(newAmount);
+    tx.note = newNote;
+    tx.timestamp = tx.timestamp; // keep original timestamp
+    save();
+    closeModal();
+    applyFilterSortRender();
+  };
+
+  // close by overlay click
+  document.getElementById('modalOverlay').addEventListener('click', function(e){
+    if(e.target === this) closeModal();
+  });
+}
+
+function closeModal(){
+  const modalRoot = $('modalRoot');
+  modalRoot.style.display = 'none';
+  modalRoot.innerHTML = '';
+}
+
+/* Delete by id */
+function deleteTx(txId){
+  if(!confirm('Hapus transaksi ini?')) return;
+  const idx = transactions.findIndex(t=>t.id===txId);
+  if(idx>=0){
+    transactions.splice(idx,1);
+    save();
+    applyFilterSortRender();
+  }
+}
+
+/* ===== Filter / Search / Sort / Render pipeline ===== */
+function applyFilterSortRender(){
+  // read filters
+  const from = $('filterFrom').value;
+  const to = $('filterTo').value;
+  const type = $('filterType').value;
+  const q = $('searchInput').value.trim().toLowerCase();
+
+  currentFilter.from = from || null;
+  currentFilter.to = to || null;
+  currentFilter.type = type || 'ALL';
+  currentFilter.q = q;
+
+  renderTable();
+}
+
+function resetFilters(){
+  $('filterFrom').value = '';
+  $('filterTo').value = '';
+  $('filterType').value = 'ALL';
+  $('searchInput').value = '';
+  currentFilter = { from:null, to:null, type:'ALL', q:'' };
+  renderTable();
+}
+
+function toggleSort(field){
+  if(uiState.sortField === field){
+    uiState.sortDir = uiState.sortDir === 'asc' ? 'desc' : 'asc';
+  } else {
+    uiState.sortField = field;
+    uiState.sortDir = 'desc';
+  }
+  renderTable();
+}
+
+/* Render visible rows based on pipeline */
+function renderTable(){
+  // copy array
+  let arr = transactions.slice();
+
+  // filter by date
+  if(currentFilter.from){
+    const start = new Date(currentFilter.from).setHours(0,0,0,0);
+    arr = arr.filter(t => new Date(t.timestamp).getTime() >= start);
+  }
+  if(currentFilter.to){
+    const end = new Date(currentFilter.to).setHours(23,59,59,999);
+    arr = arr.filter(t => new Date(t.timestamp).getTime() <= end);
+  }
+
+  // filter by type
+  if(currentFilter.type && currentFilter.type !== 'ALL'){
+    arr = arr.filter(t => t.type === currentFilter.type);
+  }
+
+  // search q in note (and optionally type)
+  if(currentFilter.q){
+    arr = arr.filter(t => (t.note||'').toLowerCase().includes(currentFilter.q) );
+  }
+
+  // sort
+  if(uiState.sortField === 'timestamp'){
+    arr.sort((a,b) => {
+      const va = new Date(a.timestamp).getTime();
+      const vb = new Date(b.timestamp).getTime();
+      return uiState.sortDir === 'asc' ? va - vb : vb - va;
+    });
+  } else if(uiState.sortField === 'amount'){
+    arr.sort((a,b) => uiState.sortDir === 'asc' ? a.amount - b.amount : b.amount - a.amount);
+  }
+
+  // update sort indicators
+  $('sortTimestamp').textContent = uiState.sortField==='timestamp' ? (uiState.sortDir==='asc' ? '↑' : '↓') : '';
+  $('sortAmount').textContent = uiState.sortField==='amount' ? (uiState.sortDir==='asc' ? '↑' : '↓') : '';
+
+  // render rows
+  const tbody = $('tableBody');
+  tbody.innerHTML = '';
+  let balance = 0;
+  arr.forEach(tx=>{
+    const tr = document.createElement('tr');
+    const typeClass = tx.type === 'IN' ? 'type-in' : 'type-out';
+    tr.innerHTML = `
+      <td>${fmtLocal(tx.timestamp)}</td>
+      <td class="${typeClass}">${tx.type}</td>
+      <td>${fmtMoney(tx.amount)}</td>
+      <td>${escapeHtml(tx.note || '')}</td>
+      <td>
+        <button class="link-btn" onclick="openEditModal('${tx.id}')">Edit</button>
+        <button class="link-btn del" onclick="deleteTx('${tx.id}')">Hapus</button>
+      </td>
+    `;
+    tbody.appendChild(tr);
+    balance += (tx.type === 'IN' ? tx.amount : -tx.amount);
+  });
+
+  $('balance').textContent = fmtMoney(balance);
+  $('countInfo').textContent = `${arr.length} transaksi (dari ${transactions.length})`;
+  // update lastSaved remains from save()
+}
+
+/* ===== Import / Export ===== */
+function exportJSON(){
+  const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kas-log.json'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+function importJSON(e){
+  const f = e.target.files[0];
+  if(!f) return;
+  const r = new FileReader();
+  r.onload = function(evt){
+    try{
+      const arr = JSON.parse(evt.target.result);
+      if(!Array.isArray(arr)) throw new Error('Format tidak valid');
+      if(!confirm('Import akan *mengganti* data saat ini. Lanjutkan?')) return;
+      transactions = arr.map(normalizeTx);
+      save();
+      applyFilterSortRender();
+      alert('Import berhasil');
+    } catch(err){
+      alert('File JSON tidak valid: ' + err.message);
+    }
+  };
+  r.readAsText(f);
+}
+
+/* CSV export */
+function exportCSV(){
+  // headers: tanggal,jenis,jumlah,catatan
+  let lines = [];
+  lines.push(['tanggal','jenis','jumlah','catatan'].join(','));
+  transactions.forEach(tx=>{
+    const tanggal = `"${fmtLocal(tx.timestamp).replace(/"/g,'""')}"`;
+    const jenis = tx.type;
+    const jumlah = tx.amount;
+    const catatan = `"${(tx.note||'').replace(/"/g,'""')}"`;
+    lines.push([tanggal, jenis, jumlah, catatan].join(','));
+  });
+  const csv = lines.join('\n');
+  const blob = new Blob([csv], { type: 'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = 'kas-log.csv'; a.click();
+  URL.revokeObjectURL(url);
+}
+
+/* normalize tx object (for safety when importing) */
+function normalizeTx(t){
+  return {
+    id: t.id || ('tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)),
+    type: (t.type === 'OUT' ? 'OUT' : 'IN'),
+    amount: Number(t.amount) || 0,
+    note: t.note || '',
+    timestamp: t.timestamp || nowISO()
+  };
+}
+
+/* escape HTML for safe display */
+function escapeHtml(s){
+  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+/* clear all */
+function clearAll(){
+  if(!confirm('Hapus semua data? Tindakan ini tidak dapat dibatalkan.')) return;
+  transactions = [];
+  save();
+  applyFilterSortRender();
+}
+
+/* init render */
+applyFilterSortRender();
+
+/* expose some funcs for onclick attributes */
+window.addTransaction = addTransaction;
+window.openEditModal = openEditModal;
+window.deleteTx = deleteTx;
+window.exportJSON = exportJSON;
+window.importJSON = importJSON;
+window.exportCSV = exportCSV;
+window.clearAll = clearAll;
+window.toggleSort = toggleSort;
+window.applyFilterSortRender = applyFilterSortRender;
+window.resetFilters = resetFilters;
+window.closeModal = closeModal;
+
+/* auto-save on unload just in case */
+window.addEventListener('beforeunload', save);
+</script>
+</body>
+</html>
