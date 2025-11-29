@@ -1,2 +1,0 @@
-# kasoffline
-Aplikasi Kas
