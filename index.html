@@ -3,197 +3,97 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width,initial-scale=1" />
-<title>Aplikasi Kas - In/Out (Offline, Responsive, Full CRUD)</title>
-
+<title>Aplikasi Kas — In/Out (Final + Pagination + Saldo)</title>
 <style>
-  :root{
-    --primary:#007bff;
-    --bg:#f5f7fb;
-    --card:#fff;
-    --muted:#666;
-    --danger:#d9534f;
-  }
+  :root{--primary:#007bff;--danger:#dc3545;--muted:#666}
   *{box-sizing:border-box}
-  body{
-    font-family: Inter, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial;
-    background:var(--bg);
-    margin:0;
-    padding:18px;
-    display:flex;
-    justify-content:center;
-  }
-  .wrap{
-    width:100%;
-    max-width:980px;
-  }
-  header{
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    gap:12px;
-    margin-bottom:12px;
-  }
+  body{font-family:Inter,system-ui,Segoe UI,Roboto,Arial;margin:0;background:#f5f7fb;padding:18px;display:flex;justify-content:center}
+  .wrap{width:100%;max-width:980px}
+  header{display:flex;justify-content:space-between;align-items:center;margin-bottom:12px}
   header h1{font-size:1.15rem;margin:0}
-  .card{
-    background:var(--card);
-    border-radius:10px;
-    padding:14px;
-    box-shadow:0 6px 18px rgba(13,38,76,0.06);
-    margin-bottom:14px;
-  }
-
-  /* form grid */
-  .form-grid{
-    display:grid;
-    grid-template-columns: 140px 1fr 140px;
-    gap:10px;
-    align-items:end;
-  }
-  .form-grid label{font-size:13px;color:var(--muted)}
-  .form-grid input[type="text"],
-  .form-grid input[type="number"],
-  .form-grid input[type="date"],
-  .form-grid select{
-    width:100%;
-    padding:10px;
-    border-radius:8px;
-    border:1px solid #e0e6ef;
-    font-size:14px;
-  }
-  .btn{
-    background:var(--primary);
-    color:white;
-    border:none;
-    padding:10px 12px;
-    border-radius:8px;
-    cursor:pointer;
-    font-size:14px;
-  }
-  .btn.ghost{
-    background:transparent;color:var(--primary);border:1px solid #d7e6ff;
-  }
-  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:10px}
-
-  /* controls */
-  .controls{
-    display:flex;
-    gap:8px;
-    flex-wrap:wrap;
-    align-items:center;
-  }
-  .controls input[type="text"]{
-    padding:8px;border-radius:8px;border:1px solid #e1e6ef;
-  }
-
-  /* table */
-  .table-wrap{
-    overflow-x:auto;
-    -webkit-overflow-scrolling:touch;
-  }
-  table{
-    width:100%;
-    border-collapse:collapse;
-    min-width:700px;
-  }
-  th,td{
-    padding:10px 12px;
-    border-bottom:1px solid #f0f3f8;
-    text-align:left;
-    font-size:14px;
-  }
-  th{
-    background:#fbfdff;
-    position:relative;
-    user-select:none;
-    cursor:pointer;
-  }
-  th .sort-ind{
-    margin-left:8px;font-size:12px;color:#888;
-  }
-
-  .type-in{ color:green; font-weight:600; }
-  .type-out{ color:var(--danger); font-weight:600; }
-
-  .link-btn{
-    background:transparent;border:none;color:var(--primary);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:13px;
-  }
-  .link-btn.del{ color:var(--danger); }
-
-  /* modal */
-  .modal-back{
-    position:fixed;inset:0;background:rgba(11,20,40,0.45);display:flex;align-items:center;justify-content:center;z-index:60;
-  }
-  .modal{
-    width:100%;
-    max-width:520px;
-    background:var(--card);
-    padding:16px;border-radius:12px;box-shadow:0 12px 30px rgba(11,20,40,0.25);
-  }
+  .card{background:#fff;border-radius:10px;padding:14px;margin-bottom:14px;box-shadow:0 6px 18px rgba(13,38,76,0.06)}
+  .grid{display:grid;grid-template-columns:140px 1fr 140px;gap:10px;align-items:end}
+  label{font-size:13px;color:var(--muted);display:block;margin-bottom:6px}
+  input[type="text"],input[type="number"],input[type="date"],select{width:100%;padding:9px;border-radius:8px;border:1px solid #e6eef8;font-size:14px}
+  .btn{background:var(--primary);color:#fff;border:none;padding:10px 12px;border-radius:8px;cursor:pointer;font-size:14px}
+  .btn.ghost{background:transparent;color:var(--primary);border:1px solid #d7e6ff}
+  .btn.warn{background:#ffc107;color:#000}
+  .btn.danger{background:var(--danger)}
+  .row{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+  .controls{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+  .table-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch}
+  table{width:100%;border-collapse:collapse;min-width:700px}
+  th,td{padding:10px;border-bottom:1px solid #f0f3f8;text-align:left;font-size:14px}
+  th{background:#fbfdff;cursor:pointer;user-select:none}
+  th .sort-ind{margin-left:8px;font-size:12px;color:#888}
+  .type-IN{color:green;font-weight:700}
+  .type-OUT{color:var(--danger);font-weight:700}
+  .link-btn{background:transparent;border:none;color:var(--primary);cursor:pointer;padding:4px 6px;border-radius:6px;font-size:13px}
+  .link-btn.del{color:var(--danger)}
+  .modal-back{position:fixed;inset:0;background:rgba(11,20,40,0.45);display:none;align-items:center;justify-content:center;z-index:60}
+  .modal{width:100%;max-width:520px;background:#fff;padding:16px;border-radius:12px;box-shadow:0 12px 30px rgba(11,20,40,0.25)}
   .modal h3{margin:0 0 8px 0}
-  .modal .row{margin-top:8px}
   .modal .actions{display:flex;gap:8px;justify-content:flex-end;margin-top:12px}
-
-  /* responsive adjustments */
-  @media (max-width:880px){
-    .form-grid{grid-template-columns:1fr; }
-    header{flex-direction:column;align-items:flex-start;gap:6px}
-  }
-  @media (max-width:520px){
-    th,td{padding:8px;font-size:13px}
-    .modal{margin:12px}
-  }
+  .small{font-size:13px;color:#666}
+  @media (max-width:880px){.grid{grid-template-columns:1fr}}
+  @media (max-width:520px){th,td{padding:8px;font-size:13px}.modal{margin:12px}}
 </style>
 </head>
 <body>
 <div class="wrap">
-
   <header>
     <h1>Aplikasi Kas — In / Out</h1>
-    <div style="color:#556;text-align:right;font-size:13px">
-      Offline • Data autosave (LocalStorage) • Backup: JSON / CSV
-    </div>
+    <div class="small">Offline • Autosave (LocalStorage) • Backup: JSON / CSV</div>
   </header>
 
   <!-- INPUT -->
   <div class="card">
-    <div class="form-grid">
+    <div class="grid">
       <div>
-        <label>Jenis</label>
+        <label for="inputDate">Tanggal</label>
+        <input id="inputDate" type="date">
+      </div>
+      <div>
+        <label for="inputType">Jenis</label>
         <select id="inputType">
           <option value="IN">IN (Masuk)</option>
           <option value="OUT">OUT (Keluar)</option>
         </select>
       </div>
-
       <div>
-        <label>Jumlah</label>
-        <input id="inputAmount" type="number" placeholder="100000" min="0" />
+        <label for="inputAmount">Jumlah</label>
+        <input id="inputAmount" type="number" min="0" placeholder="100000">
       </div>
 
-      <div>
-        <label>Catatan</label>
-        <input id="inputNote" type="text" placeholder="Contoh: Penjualan, Belanja..." />
+      <div style="grid-column:1/ -1">
+        <label for="inputNote">Catatan</label>
+        <input id="inputNote" type="text" placeholder="Contoh: Penjualan / Belanja">
       </div>
     </div>
 
-    <div class="row" style="margin-top:12px">
+    <div class="row">
       <button class="btn" onclick="addTransaction()">Tambah Transaksi</button>
-      <button class="btn ghost" onclick="clearAll()">Bersihkan Semua</button>
+      <button class="btn ghost" onclick="confirmClearAll()">Bersihkan Semua</button>
+      <button class="btn ghost" onclick="exportJSON()">Export JSON</button>
+      <button class="btn" style="background:#28a745" onclick="exportCSV()">Export CSV</button>
+
+      <input id="fileImport" type="file" accept="application/json" style="display:none" onchange="importJSON(event)">
+      <button class="btn ghost" onclick="document.getElementById('fileImport').click()">Import JSON</button>
     </div>
   </div>
 
-  <!-- FILTER / SEARCH / EXPORT -->
+  <!-- FILTER / SEARCH / INFO -->
   <div class="card">
-    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center;">
-      <div style="display:flex;gap:8px;align-items:center;">
-        <label style="font-size:13px;color:var(--muted)">Filter Tgl</label>
-        <input id="filterFrom" type="date" />
-        <input id="filterTo" type="date" />
+    <div style="display:flex;gap:12px;flex-wrap:wrap;align-items:center">
+      <div style="display:flex;gap:8px;align-items:center">
+        <label class="small">Filter Tgl</label>
+        <input id="filterFrom" type="date">
+        <input id="filterTo" type="date">
       </div>
 
-      <div style="display:flex;gap:8px;align-items:center;">
-        <label style="font-size:13px;color:var(--muted)">Jenis</label>
-        <select id="filterType" onchange="applyFilterSortRender()">
+      <div style="display:flex;gap:8px;align-items:center">
+        <label class="small">Jenis</label>
+        <select id="filterType" onchange="applyPipeline()">
           <option value="ALL">ALL</option>
           <option value="IN">IN</option>
           <option value="OUT">OUT</option>
@@ -201,31 +101,33 @@
       </div>
 
       <div style="flex:1;min-width:180px">
-        <input id="searchInput" type="text" placeholder="Cari keterangan..." oninput="applyFilterSortRender()" style="width:100%;" />
+        <input id="searchQ" type="text" placeholder="Cari keterangan..." oninput="applyPipeline()">
       </div>
 
-      <div class="controls" style="margin-left:auto">
-        <button class="btn ghost" onclick="resetFilters()">Reset Filter</button>
-
-        <button class="btn" onclick="exportJSON()">Export JSON</button>
-        <button class="btn" onclick="exportCSV()">Export CSV</button>
-
-        <input id="fileImport" type="file" accept="application/json" style="display:none" onchange="importJSON(event)" />
-        <button class="btn ghost" onclick="document.getElementById('fileImport').click()">Import JSON</button>
+      <div style="margin-left:auto;display:flex;gap:8px;align-items:center">
+        <div class="small">Show</div>
+        <select id="showLimit" onchange="changeLimit()">
+          <option value="10">10</option>
+          <option value="50">50</option>
+          <option value="100">100</option>
+          <option value="0">All</option>
+        </select>
       </div>
     </div>
-  </div>
 
-  <!-- BALANCE CARD -->
-  <div class="card" style="display:flex;justify-content:space-between;align-items:center;">
-    <div>
-      <div style="font-size:13px;color:var(--muted)">Saldo Saat Ini</div>
-      <div id="balance" style="font-size:20px;font-weight:700">0</div>
-    </div>
-
-    <div style="text-align:right;font-size:13px;color:#777">
-      <div id="countInfo">0 transaksi</div>
-      <div id="lastSaved">Belum menyimpan</div>
+    <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;gap:10px;flex-wrap:wrap">
+      <div>
+        <div class="small">Saldo (Semua Data)</div>
+        <div id="totalBalance" style="font-weight:700;font-size:18px">0</div>
+      </div>
+      <div>
+        <div class="small">Saldo (Tampil / Filter)</div>
+        <div id="viewBalance" style="font-weight:700;font-size:18px">0</div>
+      </div>
+      <div style="text-align:right">
+        <div class="small" id="countInfo">0 transaksi</div>
+        <div class="small" id="pageInfo">Page 0 / 0</div>
+      </div>
     </div>
   </div>
 
@@ -234,368 +136,340 @@
     <table>
       <thead>
         <tr>
-          <th data-sort="timestamp" onclick="toggleSort('timestamp')">Tanggal <span class="sort-ind" id="sortTimestamp"></span></th>
+          <th data-sort="date" onclick="toggleSort('date')">Tanggal <span class="sort-ind" id="sDate"></span></th>
           <th>Jenis</th>
-          <th data-sort="amount" onclick="toggleSort('amount')">Jumlah <span class="sort-ind" id="sortAmount"></span></th>
+          <th data-sort="amount" onclick="toggleSort('amount')">Jumlah <span class="sort-ind" id="sAmount"></span></th>
           <th>Catatan</th>
           <th>Aksi</th>
         </tr>
       </thead>
-      <tbody id="tableBody">
-        <!-- rows injected -->
-      </tbody>
+      <tbody id="tableBody"></tbody>
     </table>
-  </div>
 
+    <div style="display:flex;justify-content:center;align-items:center;gap:10px;margin-top:12px;flex-wrap:wrap">
+      <button class="btn ghost" onclick="prevPage()">Prev</button>
+      <div id="pager" class="small">Page 1 / 1</div>
+      <button class="btn ghost" onclick="nextPage()">Next</button>
+    </div>
+  </div>
 </div>
 
-<!-- Modal (hidden) -->
-<div id="modalRoot" style="display:none"></div>
+<!-- Modal Edit -->
+<div class="modal-back" id="modalRoot">
+  <div class="modal" role="dialog" aria-modal="true">
+    <h3>Edit Transaksi</h3>
+
+    <div style="margin-top:8px">
+      <label> Tanggal </label>
+      <input id="editDate" type="date">
+    </div>
+    <div style="margin-top:8px">
+      <label> Jenis </label>
+      <select id="editType"><option>IN</option><option>OUT</option></select>
+    </div>
+    <div style="margin-top:8px">
+      <label> Jumlah </label>
+      <input id="editAmount" type="number" min="0">
+    </div>
+    <div style="margin-top:8px">
+      <label> Catatan </label>
+      <input id="editNote" type="text">
+    </div>
+
+    <div class="actions" style="display:flex;justify-content:flex-end;margin-top:12px">
+      <button class="btn ghost" onclick="closeModal()">Batal</button>
+      <button class="btn" id="saveEditBtn">Simpan</button>
+    </div>
+  </div>
+</div>
+
+<!-- Modal Clear All Confirm -->
+<div class="modal-back" id="modalClear">
+  <div class="modal">
+    <h3>Hapus Semua Data?</h3>
+    <p>Data akan dihapus permanen dari browser (LocalStorage). Yakin?</p>
+    <div style="display:flex;gap:8px;justify-content:flex-end;margin-top:12px">
+      <button class="btn ghost" onclick="closeClear()">No</button>
+      <button class="btn danger" onclick="confirmClearAllYes()">Yes, hapus semua</button>
+    </div>
+  </div>
+</div>
 
 <script>
-/* ===== Data model & persistence =====
-   - transactions: array of { id, type, amount, note, timestampISO }
-   - save to localStorage key: 'kas_transactions_v1'
-*/
-const LS_KEY = 'kas_transactions_v1';
-let transactions = [];
-let uiState = {
-  sortField: 'timestamp', // 'timestamp' or 'amount'
-  sortDir: 'desc' // 'asc' or 'desc'
-};
-let currentFilter = {
-  from: null,
-  to: null,
-  type: 'ALL',
-  q: ''
-};
+/* -------------------------
+   Data model & persistence
+   ------------------------- */
+const LS_KEY = 'kas_app_v1';
+let transactions = []; // each: { id, date 'YYYY-MM-DD', type 'IN'|'OUT', amount(Number), note }
+let filtered = [];
+let currentPage = 1;
+let showLimit = 10; // 0 == all
+let sortField = 'date'; // 'date' or 'amount'
+let sortDir = 'desc'; // 'asc' or 'desc'
+let editingId = null;
 
-// --- Utilities ---
-const $ = (id)=>document.getElementById(id);
-function nowISO(){ return new Date().toISOString(); }
-function fmtLocal(tsISO){
-  try { return new Date(tsISO).toLocaleString(); } catch { return tsISO; }
-}
-function fmtMoney(n){
-  return Number(n).toLocaleString('id-ID', {maximumFractionDigits:2});
+/* --- helpers --- */
+const $ = id => document.getElementById(id);
+function todayDateString(){
+  const d = new Date();
+  const y = d.getFullYear();
+  const m = String(d.getMonth()+1).padStart(2,'0');
+  const day = String(d.getDate()).padStart(2,'0');
+  return `${y}-${m}-${day}`;
 }
 function save(){
   localStorage.setItem(LS_KEY, JSON.stringify(transactions));
-  $('lastSaved').textContent = 'Tersimpan: ' + new Date().toLocaleTimeString();
 }
 function load(){
-  const s = localStorage.getItem(LS_KEY);
-  if(s){
-    try {
-      const arr = JSON.parse(s);
-      if(Array.isArray(arr)) transactions = arr;
-    } catch(e){ transactions = []; }
-  } else transactions = [];
+  try {
+    const s = localStorage.getItem(LS_KEY);
+    transactions = s ? JSON.parse(s) : [];
+  } catch(e){ transactions = []; }
 }
+function uid(){ return 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
+function fmtMoney(n){ return Number(n).toLocaleString('id-ID', {maximumFractionDigits:2}); }
 
-/* --- Init load --- */
+/* --- initialize --- */
 load();
+// set default date input to today
+$('inputDate').value = todayDateString();
 
-/* ===== CRUD ===== */
+/* wire inputs change to re-run pipeline */
+['filterFrom','filterTo','filterType','searchQ'].forEach(id=>{
+  $(id).addEventListener('input', ()=>{ currentPage=1; applyPipeline(); });
+});
+$('showLimit').addEventListener('change', ()=>{ showLimit = Number($('showLimit').value); currentPage=1; applyPipeline(); });
+
+/* initial showLimit */
+showLimit = Number($('showLimit').value);
+
+/* -------------------------
+   CRUD
+   ------------------------- */
 function addTransaction(){
+  const date = $('inputDate').value || todayDateString();
   const type = $('inputType').value;
-  const amount = parseFloat($('inputAmount').value);
-  const note = $('inputNote').value.trim();
+  const amount = Number($('inputAmount').value);
+  const note = $('inputNote').value || '';
 
-  if(!isFinite(amount) || amount <= 0){
-    alert('Masukkan jumlah valid (> 0).');
-    return;
-  }
+  if(!date || !isFinite(amount) || amount <= 0){ alert('Tanggal dan jumlah valid diperlukan'); return; }
 
-  const tx = {
-    id: 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8),
-    type, amount: Number(amount), note, timestamp: nowISO()
-  };
-  transactions.push(tx);
+  transactions.push({ id: uid(), date, type, amount: Number(amount), note });
   save();
-  applyFilterSortRender();
+  // clear inputs, keep date default to today
   $('inputAmount').value = '';
   $('inputNote').value = '';
+  $('inputDate').value = todayDateString();
+  applyPipeline();
 }
 
-/* Edit: open modal, modify tx by id */
-function openEditModal(txId){
-  const tx = transactions.find(t=>t.id===txId);
-  if(!tx) return alert('Transaksi tidak ditemukan');
-
-  const modalRoot = $('modalRoot');
-  modalRoot.innerHTML = `
-    <div class="modal-back" id="modalOverlay">
-      <div class="modal" role="dialog" aria-modal="true">
-        <h3>Edit Transaksi</h3>
-
-        <div style="margin-top:8px">
-          <label style="font-size:13px;color:var(--muted)">Jenis</label>
-          <select id="editType" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;">
-            <option value="IN">IN</option>
-            <option value="OUT">OUT</option>
-          </select>
-        </div>
-
-        <div style="margin-top:8px">
-          <label style="font-size:13px;color:var(--muted)">Jumlah</label>
-          <input id="editAmount" type="number" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;" />
-        </div>
-
-        <div style="margin-top:8px">
-          <label style="font-size:13px;color:var(--muted)">Catatan</label>
-          <input id="editNote" type="text" style="width:100%;padding:10px;border-radius:8px;border:1px solid #e8eef8;" />
-        </div>
-
-        <div style="margin-top:10px;display:flex;justify-content:flex-end;gap:8px">
-          <button class="btn ghost" onclick="closeModal()">Batal</button>
-          <button class="btn" id="saveEditBtn">Simpan</button>
-        </div>
-      </div>
-    </div>
-  `;
-  modalRoot.style.display = 'block';
-
-  // populate
+/* Edit */
+function openEditModal(id){
+  const tx = transactions.find(t=>t.id===id);
+  if(!tx) return alert('Data tidak ditemukan');
+  editingId = id;
+  $('editDate').value = tx.date;
   $('editType').value = tx.type;
   $('editAmount').value = tx.amount;
-  $('editNote').value = tx.note || '';
-
-  // handers
-  $('saveEditBtn').onclick = function(){
-    const newType = $('editType').value;
-    const newAmount = parseFloat($('editAmount').value);
-    const newNote = $('editNote').value;
-
-    if(!isFinite(newAmount) || newAmount <= 0){
-      alert('Jumlah harus angka > 0');
-      return;
-    }
-
-    tx.type = newType;
-    tx.amount = Number(newAmount);
-    tx.note = newNote;
-    tx.timestamp = tx.timestamp; // keep original timestamp
-    save();
-    closeModal();
-    applyFilterSortRender();
-  };
-
-  // close by overlay click
-  document.getElementById('modalOverlay').addEventListener('click', function(e){
-    if(e.target === this) closeModal();
-  });
+  $('editNote').value = tx.note;
+  $('modalRoot').style.display = 'flex';
 }
+$('saveEditBtn').addEventListener('click', ()=>{
+  if(!editingId) return closeModal();
+  const tx = transactions.find(t=>t.id===editingId);
+  if(!tx) return closeModal();
+  const nd = $('editDate').value;
+  const nt = $('editType').value;
+  const na = Number($('editAmount').value);
+  const nn = $('editNote').value;
+  if(!nd || !isFinite(na) || na <= 0){ alert('Tanggal / jumlah valid'); return; }
+  tx.date = nd; tx.type = nt; tx.amount = na; tx.note = nn;
+  save();
+  closeModal();
+  applyPipeline();
+});
+function closeModal(){ editingId=null; $('modalRoot').style.display = 'none'; }
 
-function closeModal(){
-  const modalRoot = $('modalRoot');
-  modalRoot.style.display = 'none';
-  modalRoot.innerHTML = '';
-}
-
-/* Delete by id */
-function deleteTx(txId){
+/* Delete */
+function deleteTx(id){
   if(!confirm('Hapus transaksi ini?')) return;
-  const idx = transactions.findIndex(t=>t.id===txId);
-  if(idx>=0){
-    transactions.splice(idx,1);
-    save();
-    applyFilterSortRender();
-  }
+  const idx = transactions.findIndex(t=>t.id===id);
+  if(idx>=0) transactions.splice(idx,1);
+  save();
+  applyPipeline();
 }
 
-/* ===== Filter / Search / Sort / Render pipeline ===== */
-function applyFilterSortRender(){
+/* Clear All (confirm modal) */
+function confirmClearAll(){ $('modalClear').style.display = 'flex'; }
+function closeClear(){ $('modalClear').style.display = 'none'; }
+function confirmClearAllYes(){
+  localStorage.removeItem(LS_KEY);
+  transactions = [];
+  save();
+  closeClear();
+  // refresh page as requested
+  location.reload();
+}
+
+/* -------------------------
+   Filter / Sort / Pagination pipeline
+   ------------------------- */
+function applyPipeline(){
   // read filters
-  const from = $('filterFrom').value;
-  const to = $('filterTo').value;
-  const type = $('filterType').value;
-  const q = $('searchInput').value.trim().toLowerCase();
+  const from = $('filterFrom').value || null;
+  const to = $('filterTo').value || null;
+  const type = $('filterType').value || 'ALL';
+  const q = ($('searchQ').value || '').trim().toLowerCase();
 
-  currentFilter.from = from || null;
-  currentFilter.to = to || null;
-  currentFilter.type = type || 'ALL';
-  currentFilter.q = q;
+  // filter
+  filtered = transactions.filter(t=>{
+    if(from && t.date < from) return false;
+    if(to && t.date > to) return false;
+    if(type !== 'ALL' && t.type !== type) return false;
+    if(q && !(t.note || '').toLowerCase().includes(q)) return false;
+    return true;
+  });
 
-  renderTable();
-}
+  // compute balances
+  const totalBal = transactions.reduce((s,t)=> s + (t.type==='IN' ? t.amount : -t.amount), 0);
+  const viewBal  = filtered.reduce((s,t)=> s + (t.type==='IN' ? t.amount : -t.amount), 0);
 
-function resetFilters(){
-  $('filterFrom').value = '';
-  $('filterTo').value = '';
-  $('filterType').value = 'ALL';
-  $('searchInput').value = '';
-  currentFilter = { from:null, to:null, type:'ALL', q:'' };
-  renderTable();
-}
-
-function toggleSort(field){
-  if(uiState.sortField === field){
-    uiState.sortDir = uiState.sortDir === 'asc' ? 'desc' : 'asc';
-  } else {
-    uiState.sortField = field;
-    uiState.sortDir = 'desc';
-  }
-  renderTable();
-}
-
-/* Render visible rows based on pipeline */
-function renderTable(){
-  // copy array
-  let arr = transactions.slice();
-
-  // filter by date
-  if(currentFilter.from){
-    const start = new Date(currentFilter.from).setHours(0,0,0,0);
-    arr = arr.filter(t => new Date(t.timestamp).getTime() >= start);
-  }
-  if(currentFilter.to){
-    const end = new Date(currentFilter.to).setHours(23,59,59,999);
-    arr = arr.filter(t => new Date(t.timestamp).getTime() <= end);
-  }
-
-  // filter by type
-  if(currentFilter.type && currentFilter.type !== 'ALL'){
-    arr = arr.filter(t => t.type === currentFilter.type);
-  }
-
-  // search q in note (and optionally type)
-  if(currentFilter.q){
-    arr = arr.filter(t => (t.note||'').toLowerCase().includes(currentFilter.q) );
-  }
+  $('totalBalance').textContent = fmtMoney(totalBal);
+  $('viewBalance').textContent  = fmtMoney(viewBal);
+  $('countInfo').textContent = `${filtered.length} transaksi (total ${transactions.length})`;
 
   // sort
-  if(uiState.sortField === 'timestamp'){
-    arr.sort((a,b) => {
-      const va = new Date(a.timestamp).getTime();
-      const vb = new Date(b.timestamp).getTime();
-      return uiState.sortDir === 'asc' ? va - vb : vb - va;
+  if(sortField === 'date'){
+    filtered.sort((a,b)=> {
+      const va = new Date(a.date).getTime();
+      const vb = new Date(b.date).getTime();
+      return sortDir==='asc' ? va - vb : vb - va;
     });
-  } else if(uiState.sortField === 'amount'){
-    arr.sort((a,b) => uiState.sortDir === 'asc' ? a.amount - b.amount : b.amount - a.amount);
+  } else if(sortField === 'amount'){
+    filtered.sort((a,b)=> sortDir==='asc' ? a.amount - b.amount : b.amount - a.amount);
   }
 
-  // update sort indicators
-  $('sortTimestamp').textContent = uiState.sortField==='timestamp' ? (uiState.sortDir==='asc' ? '↑' : '↓') : '';
-  $('sortAmount').textContent = uiState.sortField==='amount' ? (uiState.sortDir==='asc' ? '↑' : '↓') : '';
+  // pagination
+  renderTable();
+}
 
-  // render rows
+/* Sorting toggles */
+function toggleSort(field){
+  if(sortField === field) sortDir = (sortDir==='asc' ? 'desc' : 'asc');
+  else { sortField = field; sortDir = 'desc'; }
+  // update indicators
+  $('sDate').textContent = sortField==='date' ? (sortDir==='asc' ? '↑' : '↓') : '';
+  $('sAmount').textContent = sortField==='amount' ? (sortDir==='asc' ? '↑' : '↓') : '';
+  applyPipeline();
+}
+
+/* Pagination controls */
+function changeLimit(){
+  showLimit = Number($('showLimit').value);
+  currentPage = 1;
+  applyPipeline();
+}
+function nextPage(){
+  const totalPages = (showLimit === 0) ? 1 : Math.max(1, Math.ceil(filtered.length / showLimit));
+  if(currentPage < totalPages){ currentPage++; renderTable(); }
+}
+function prevPage(){
+  if(currentPage > 1){ currentPage--; renderTable(); }
+}
+
+/* Render table with current page & limit */
+function renderTable(){
   const tbody = $('tableBody');
   tbody.innerHTML = '';
-  let balance = 0;
-  arr.forEach(tx=>{
+
+  const limit = Number($('showLimit').value);
+  const totalPages = (limit === 0) ? 1 : Math.max(1, Math.ceil(filtered.length / limit));
+  if(currentPage > totalPages) currentPage = totalPages;
+  if(currentPage < 1) currentPage = 1;
+
+  const start = (limit === 0) ? 0 : (currentPage - 1) * limit;
+  const end = (limit === 0) ? filtered.length : start + limit;
+  const pageData = filtered.slice(start, end);
+
+  pageData.forEach(tx=>{
     const tr = document.createElement('tr');
-    const typeClass = tx.type === 'IN' ? 'type-in' : 'type-out';
     tr.innerHTML = `
-      <td>${fmtLocal(tx.timestamp)}</td>
-      <td class="${typeClass}">${tx.type}</td>
+      <td>${(new Date(tx.date)).toLocaleDateString()}</td>
+      <td class="type-${tx.type}">${tx.type}</td>
       <td>${fmtMoney(tx.amount)}</td>
-      <td>${escapeHtml(tx.note || '')}</td>
+      <td>${(tx.note || '').replaceAll('<','&lt;').replaceAll('>','&gt;')}</td>
       <td>
         <button class="link-btn" onclick="openEditModal('${tx.id}')">Edit</button>
         <button class="link-btn del" onclick="deleteTx('${tx.id}')">Hapus</button>
       </td>
     `;
     tbody.appendChild(tr);
-    balance += (tx.type === 'IN' ? tx.amount : -tx.amount);
   });
 
-  $('balance').textContent = fmtMoney(balance);
-  $('countInfo').textContent = `${arr.length} transaksi (dari ${transactions.length})`;
-  // update lastSaved remains from save()
+  $('pager').textContent = `Page ${currentPage} / ${totalPages}`;
+  $('pageInfo').textContent = `Page ${currentPage} / ${totalPages}`;
 }
 
-/* ===== Import / Export ===== */
+/* -------------------------
+   Import / Export
+   ------------------------- */
 function exportJSON(){
-  const blob = new Blob([JSON.stringify(transactions, null, 2)], { type: 'application/json' });
+  const blob = new Blob([JSON.stringify(transactions, null,2)], { type: 'application/json' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'kas-log.json'; a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'kas-log.json'; a.click();
   URL.revokeObjectURL(url);
 }
-
 function importJSON(e){
   const f = e.target.files[0];
   if(!f) return;
   const r = new FileReader();
-  r.onload = function(evt){
-    try{
-      const arr = JSON.parse(evt.target.result);
-      if(!Array.isArray(arr)) throw new Error('Format tidak valid');
-      if(!confirm('Import akan *mengganti* data saat ini. Lanjutkan?')) return;
-      transactions = arr.map(normalizeTx);
+  r.onload = ()=> {
+    try {
+      const arr = JSON.parse(r.result);
+      if(!Array.isArray(arr)) throw new Error('Format JSON tidak valid');
+      // normalize entries
+      transactions = arr.map(x => ({
+        id: x.id || uid(),
+        date: x.date || (x.tanggal || todayDateString()),
+        type: (x.type==='OUT') ? 'OUT' : 'IN',
+        amount: Number(x.amount || x.jumlah || 0),
+        note: x.note || x.ket || x.note || ''
+      }));
       save();
-      applyFilterSortRender();
+      currentPage = 1;
+      applyPipeline();
       alert('Import berhasil');
     } catch(err){
-      alert('File JSON tidak valid: ' + err.message);
+      alert('Import gagal: ' + err.message);
     }
   };
   r.readAsText(f);
 }
-
-/* CSV export */
 function exportCSV(){
-  // headers: tanggal,jenis,jumlah,catatan
-  let lines = [];
-  lines.push(['tanggal','jenis','jumlah','catatan'].join(','));
-  transactions.forEach(tx=>{
-    const tanggal = `"${fmtLocal(tx.timestamp).replace(/"/g,'""')}"`;
-    const jenis = tx.type;
-    const jumlah = tx.amount;
-    const catatan = `"${(tx.note||'').replace(/"/g,'""')}"`;
-    lines.push([tanggal, jenis, jumlah, catatan].join(','));
+  let lines = [ ['tanggal','jenis','jumlah','catatan'].join(',') ];
+  transactions.forEach(t=>{
+    const tanggal = `"${t.date}"`;
+    const jenis = t.type;
+    const jumlah = t.amount;
+    const cat = `"${(t.note||'').replace(/"/g,'""')}"`;
+    lines.push([tanggal,jenis,jumlah,cat].join(','));
   });
   const csv = lines.join('\n');
   const blob = new Blob([csv], { type: 'text/csv' });
   const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url; a.download = 'kas-log.csv'; a.click();
+  const a = document.createElement('a'); a.href = url; a.download = 'kas-log.csv'; a.click();
   URL.revokeObjectURL(url);
 }
 
-/* normalize tx object (for safety when importing) */
-function normalizeTx(t){
-  return {
-    id: t.id || ('tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8)),
-    type: (t.type === 'OUT' ? 'OUT' : 'IN'),
-    amount: Number(t.amount) || 0,
-    note: t.note || '',
-    timestamp: t.timestamp || nowISO()
-  };
-}
+/* -------------------------
+   Utility uid reused
+   ------------------------- */
+function uid(){ return 'tx_' + Date.now() + '_' + Math.random().toString(36).slice(2,8); }
 
-/* escape HTML for safe display */
-function escapeHtml(s){
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-/* clear all */
-function clearAll(){
-  if(!confirm('Hapus semua data? Tindakan ini tidak dapat dibatalkan.')) return;
-  transactions = [];
-  save();
-  applyFilterSortRender();
-}
-
-/* init render */
-applyFilterSortRender();
-
-/* expose some funcs for onclick attributes */
-window.addTransaction = addTransaction;
-window.openEditModal = openEditModal;
-window.deleteTx = deleteTx;
-window.exportJSON = exportJSON;
-window.importJSON = importJSON;
-window.exportCSV = exportCSV;
-window.clearAll = clearAll;
-window.toggleSort = toggleSort;
-window.applyFilterSortRender = applyFilterSortRender;
-window.resetFilters = resetFilters;
-window.closeModal = closeModal;
-
-/* auto-save on unload just in case */
-window.addEventListener('beforeunload', save);
+/* -------------------------
+   Init
+   ------------------------- */
+applyPipeline(); // initial render
 </script>
 </body>
 </html>
